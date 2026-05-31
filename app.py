@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import json
 import math
 import random
+from yahooquery import search
 import requests
 import pandas as pd
 import numpy as np
@@ -473,13 +474,81 @@ def generate_signal(rsi, macd, trend, sentiment, pred_day, current_price):
     }
 # ── Routes ─────────────────────────────────────────────────────────────────────
 
+KNOWN_STOCKS = {
+    "SUZLON ENERGY": "SUZLON.NS",
+    "SUZLON": "SUZLON.NS",
+    "RELIANCE": "RELIANCE.NS",
+    "TATA CONSULTANCY SERVICES": "TCS.NS",
+    "TCS": "TCS.NS",
+    "INFOSYS": "INFY.NS",
+    "INFY": "INFY.NS",
+    "HDFC BANK": "HDFCBANK.NS",
+    "HDFCBANK": "HDFCBANK.NS"
+}
+
+def find_symbol(query):
+    try:
+        result = search(query)
+
+        quotes = result.get("quotes", [])
+
+        if quotes:
+            return quotes[0]["symbol"]
+
+    except Exception as e:
+        print("Search Error:", e)
+
+    return query
+def resolve_ticker(symbol):
+    symbol = symbol.strip().upper()
+
+    if symbol in KNOWN_STOCKS:
+        return KNOWN_STOCKS[symbol]
+
+    if "." in symbol:
+        return symbol
+
+    candidates = [
+        symbol,
+        f"{symbol}.NS",
+        f"{symbol}.BO"
+    ]
+
+    for candidate in candidates:
+        try:
+            url = (
+                f"https://query1.finance.yahoo.com/v8/finance/chart/"
+                f"{candidate}?interval=1d&range=5d"
+            )
+
+            r = requests.get(
+                url,
+                headers=HEADERS,
+                timeout=5
+            )
+
+            if r.status_code == 200:
+                data = r.json()
+
+                if data.get("chart", {}).get("result"):
+                    return candidate
+
+        except:
+            pass
+
+    return symbol
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route("/api/search")
 def api_search():
-    q = request.args.get("q", "").strip().upper()
+    q = request.args.get("q", "").strip()
+
+    q = find_symbol(q)
+
+    q = resolve_ticker(find_symbol(q))
     if not q:
         return jsonify({"error": "No ticker provided"}), 400
     try:
@@ -497,8 +566,15 @@ def api_search():
 
 @app.route("/api/analyze")
 def api_analyze():
-    ticker = request.args.get("ticker", "").strip().upper()
+    ticker = request.args.get("ticker", "").strip()
+    print("INPUT TICKER:", ticker)
+
+    ticker = resolve_ticker(find_symbol(ticker))
+    print("RESOLVED TICKER:", ticker)
+
     print("Ticker received:", ticker)
+
+
     period = request.args.get("period", "1y")
     if not ticker:
         return jsonify({"error": "No ticker"}), 400

@@ -15,9 +15,9 @@
   --muted:    #6b7794;
   --radius:   14px;
 
-  --font-head: 'Syne', sans-serif;
-  --font-mono: 'Space Mono', monospace;
-  --font-body: 'DM Sans', sans-serif;
+--font-head: 'Orbitron', sans-serif;
+--font-mono: 'JetBrains Mono', monospace;
+--font-body: 'Manrope', sans-serif;
 }
 
 html, body {
