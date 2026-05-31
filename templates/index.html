@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StockSense AI — Intelligent Market Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-name">StockSense<em>AI</em></span>
+  </div>
+  <div class="nav-links">
+    <a href="#" class="nav-link active" data-view="home">Home</a>
+    <a href="#" class="nav-link" data-view="analysis">Analysis</a>
+    <a href="#" class="nav-link" data-view="prediction">Prediction</a>
+  </div>
+  <div class="nav-status" id="marketStatus">
+    <span class="status-dot"></span> Market Live
+  </div>
+</nav>
+
+<!-- ── HOME VIEW ── -->
+<div id="view-home" class="view active">
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="grid-lines"></div>
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">AI-POWERED ANALYSIS</div>
+      <h1 class="hero-title">
+        Predict Markets.<br/>
+        <span class="accent">Beat the Odds.</span>
+      </h1>
+      <p class="hero-sub">
+        Real-time technical analysis, LSTM predictions, and sentiment scoring.<br/>
+        One search. Every insight you need.
+      </p>
+
+      <div class="search-wrap">
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="searchInput" placeholder="Search ticker: RELIANCE.NS, TCS.NS, AAPL, TSLA…" autocomplete="off"/>
+          <button id="searchBtn" class="search-btn">Analyze</button>
+        </div>
+        <div class="quick-picks">
+          <span class="qp-label">Popular:</span>
+          <button class="qp-btn" data-ticker="RELIANCE.NS">RELIANCE</button>
+          <button class="qp-btn" data-ticker="TCS.NS">TCS</button>
+          <button class="qp-btn" data-ticker="INFY.NS">INFY</button>
+          <button class="qp-btn" data-ticker="AAPL">AAPL</button>
+          <button class="qp-btn" data-ticker="TSLA">TSLA</button>
+          <button class="qp-btn" data-ticker="ETERNAL.NS">ETERNAL</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-num">5</div><div class="hstat-label">Analysis Phases</div></div>
+      <div class="hstat-div"></div>
+      <div class="hstat"><div class="hstat-num">Real-time</div><div class="hstat-label">Market Data</div></div>
+      <div class="hstat-div"></div>
+      <div class="hstat"><div class="hstat-num">AI</div><div class="hstat-label">Signal Engine</div></div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feat-card">
+      <div class="feat-icon">📈</div>
+      <h3>Technical Analysis</h3>
+      <p>RSI, MACD, Moving Averages, Bollinger Bands — all calculated in real time.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🤖</div>
+      <h3>ML Price Prediction</h3>
+      <p>Regression model trained on historical data predicts next-day and next-week price.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📰</div>
+      <h3>News Sentiment</h3>
+      <p>Automatic sentiment scoring of latest news headlines for any stock.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🎯</div>
+      <h3>AI BUY/SELL Signal</h3>
+      <p>Combined confidence score from LSTM (40%), Technical (30%), Sentiment (30%).</p>
+    </div>
+  </section>
+</div>
+
+<!-- ── ANALYSIS VIEW ── -->
+<div id="view-analysis" class="view">
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+      <div class="loading-steps">
+        <div class="lstep" id="lstep1">Fetching market data…</div>
+        <div class="lstep" id="lstep2">Calculating indicators…</div>
+        <div class="lstep" id="lstep3">Running ML model…</div>
+        <div class="lstep" id="lstep4">Analysing sentiment…</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="analysisContent" class="hidden">
+    <!-- Header -->
+    <div class="stock-header">
+      <div class="sh-left">
+        <div class="sh-ticker" id="shTicker">--</div>
+        <div class="sh-name" id="shName">--</div>
+        <div class="sh-exchange" id="shExchange">--</div>
+      </div>
+      <div class="sh-right">
+        <div class="sh-price" id="shPrice">--</div>
+        <div class="sh-change" id="shChange">--</div>
+      </div>
+      <div class="sh-period">
+        <button class="period-btn active" data-period="1mo">1M</button>
+        <button class="period-btn" data-period="3mo">3M</button>
+        <button class="period-btn" data-period="6mo">6M</button>
+        <button class="period-btn" data-period="1y">1Y</button>
+        <button class="period-btn" data-period="2y">2Y</button>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-card">
+      <div class="chart-title">Price History</div>
+      <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+    </div>
+
+    <!-- Indicator Cards -->
+    <div class="indicator-grid">
+      <div class="ind-card">
+        <div class="ind-label">RSI (14)</div>
+        <div class="ind-value" id="indRsi">--</div>
+        <div class="ind-gauge"><div class="ind-gauge-fill" id="rsiGauge"></div></div>
+        <div class="ind-sub" id="indRsiLabel">--</div>
+      </div>
+      <div class="ind-card">
+        <div class="ind-label">MACD</div>
+        <div class="ind-value" id="indMacd">--</div>
+        <div class="ind-signal-badge" id="indMacdBadge">--</div>
+      </div>
+      <div class="ind-card">
+        <div class="ind-label">50-Day MA</div>
+        <div class="ind-value" id="indMa50">--</div>
+      </div>
+      <div class="ind-card">
+        <div class="ind-label">200-Day MA</div>
+        <div class="ind-value" id="indMa200">--</div>
+      </div>
+      <div class="ind-card">
+        <div class="ind-label">Trend</div>
+        <div class="ind-value trend-val" id="indTrend">--</div>
+      </div>
+      <div class="ind-card">
+        <div class="ind-label">Bollinger Upper</div>
+        <div class="ind-value" id="indBollU">--</div>
+      </div>
+    </div>
+
+    <!-- Prediction + Sentiment Row -->
+    <div class="ps-row">
+      <div class="pred-card">
+        <div class="pred-title">ML Price Prediction</div>
+        <div class="pred-row">
+          <div class="pred-item">
+            <div class="pred-label">Current</div>
+            <div class="pred-current" id="predCurrent">--</div>
+          </div>
+          <div class="pred-arrow">→</div>
+          <div class="pred-item">
+            <div class="pred-label">Next Day</div>
+            <div class="pred-future" id="predDay">--</div>
+            <div class="pred-gain" id="predDayGain">--</div>
+          </div>
+          <div class="pred-arrow">→</div>
+          <div class="pred-item">
+            <div class="pred-label">Next Week</div>
+            <div class="pred-future" id="predWeek">--</div>
+            <div class="pred-gain" id="predWeekGain">--</div>
+          </div>
+        </div>
+      </div>
+      <div class="sent-card">
+        <div class="pred-title">News Sentiment</div>
+        <div class="sent-score-wrap">
+          <svg class="sent-ring" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/>
+            <circle cx="40" cy="40" r="32" fill="none" stroke-width="7"
+                    stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="201"
+                    id="sentRing" transform="rotate(-90 40 40)"/>
+          </svg>
+          <div class="sent-score-inner">
+            <div class="sent-num" id="sentScore">--</div>
+            <div class="sent-label" id="sentLabel">--</div>
+          </div>
+        </div>
+        <div class="sent-headlines" id="sentHeadlines"></div>
+      </div>
+    </div>
+
+    <!-- News & Headlines -->
+    <div class="news-card">
+      <div class="news-title">Latest News Headlines</div>
+      <div id="newsList" class="news-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PREDICTION VIEW ── -->
+<div id="view-prediction" class="view">
+  <div id="predictionContent" class="pred-view">
+    <div class="pv-header">
+      <h2>AI Signal Engine</h2>
+      <p id="pvTicker">Search a stock to see prediction</p>
+    </div>
+
+    <div class="signal-box" id="signalBox">
+      <div class="signal-label">Signal</div>
+      <div class="signal-text" id="signalText">--</div>
+      <div class="signal-confidence">
+        <div class="conf-label">Confidence</div>
+        <div class="conf-bar-wrap">
+          <div class="conf-bar" id="confBar" style="width:0%"></div>
+        </div>
+        <div class="conf-pct" id="confPct">--%</div>
+      </div>
+    </div>
+
+    <div class="weight-breakdown">
+      <div class="wb-title">Signal Composition</div>
+      <div class="wb-rows">
+        <div class="wb-row">
+          <span class="wb-lbl">LSTM Prediction</span>
+          <div class="wb-bar-wrap"><div class="wb-bar" id="wbLstm" style="width:0%"></div></div>
+          <span class="wb-pct">40%</span>
+        </div>
+        <div class="wb-row">
+          <span class="wb-lbl">Technical Analysis</span>
+          <div class="wb-bar-wrap"><div class="wb-bar" id="wbTech" style="width:0%"></div></div>
+          <span class="wb-pct">30%</span>
+        </div>
+        <div class="wb-row">
+          <span class="wb-lbl">News Sentiment</span>
+          <div class="wb-bar-wrap"><div class="wb-bar" id="wbSent" style="width:0%"></div></div>
+          <span class="wb-pct">30%</span>
+        </div>
+      </div>
+    </div>
+
+<div class="accuracy-card">
+    <div class="reasons-title">Model Accuracy</div>
+
+    <div class="indicator-grid">
+
+        <div class="ind-card">
+            <div class="ind-label">MAE</div>
+            <div class="ind-value" id="maeValue">--</div>
+        </div>
+
+        <div class="ind-card">
+            <div class="ind-label">RMSE</div>
+            <div class="ind-value" id="rmseValue">--</div>
+        </div>
+
+    </div>
+</div>
+
+    <div class="reasons-card">
+      <div class="reasons-title">Reasons</div>
+      <ul id="reasonsList" class="reasons-list"></ul>
+    </div>
+
+    <div class="disclaimer">
+      ⚠ This is for educational purposes only. Not financial advice.
+    </div>
+  </div>
+</div>
+
+<div id="errorToast" class="error-toast hidden"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
