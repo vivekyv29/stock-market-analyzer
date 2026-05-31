@@ -208,9 +208,7 @@ function buildPriceChart(history, sym, forecastPrices = []) {
 
     console.log("Forecast Prices:", forecastPrices);
 
-    const recentHistory = history.slice(-60);
-
-const closes = recentHistory.map(r => r.close);
+const closes = history.map(r => r.close);
 
     // Dynamic forecast labels
     const forecastLabels = [];
@@ -219,7 +217,7 @@ const closes = recentHistory.map(r => r.close);
     }
 
     const labels = [
-        ...recentHistory.map(r => r.date),
+        ...history.map(r => r.date),
         ...forecastLabels
     ];
 
