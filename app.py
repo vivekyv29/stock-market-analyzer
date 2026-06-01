@@ -6,17 +6,31 @@ from yahooquery import search
 import requests
 import pandas as pd
 import numpy as np
+import os
 
 from datetime import datetime, timedelta
 from transformers import pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error
-
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
+from flask import Flask, render_template, jsonify, request, redirect, session, url_for
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
+
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = (
+        "no-cache, no-store, must-revalidate"
+    )
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+bcrypt = Bcrypt(app)
+app.secret_key = "stocksenseai_secret_key"
 print("Loading FinBERT...")
 
 finbert = pipeline(
@@ -540,7 +554,85 @@ def resolve_ticker(symbol):
 
 @app.route("/")
 def index():
+
+    if "user" not in session:
+        return redirect("/login")
+
     return render_template("index.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        hashed_password = bcrypt.generate_password_hash(
+            password
+        ).decode("utf-8")
+
+        users = []
+
+        if os.path.exists("users.json"):
+            with open("users.json", "r") as f:
+                users = json.load(f)
+
+        users.append({
+            "username": username,
+            "password": hashed_password
+        })
+
+        with open("users.json", "w") as f:
+            json.dump(users, f, indent=4)
+
+        return redirect("/login")
+
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        if os.path.exists("users.json"):
+
+            with open("users.json", "r") as f:
+                users = json.load(f)
+
+            for user in users:
+
+                if (
+                    user["username"] == username
+                    and bcrypt.check_password_hash(
+                        user["password"],
+                        password
+                    )
+                ):
+
+                    session["user"] = username
+
+                    return redirect("/")
+
+        return "Invalid Username or Password"
+
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    response = redirect("/login")
+
+    response.headers["Cache-Control"] = (
+        "no-cache, no-store, must-revalidate"
+    )
+
+    return response
 
 @app.route("/api/search")
 def api_search():

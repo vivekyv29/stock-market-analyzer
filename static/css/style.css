@@ -20,6 +20,12 @@
 --font-body: 'Manrope', sans-serif;
 }
 
+.disabled-nav{
+    opacity:0.4;
+    pointer-events:none;
+    cursor:not-allowed;
+}
+
 html, body {
   background: var(--bg);
   color: var(--text);
@@ -29,6 +35,25 @@ html, body {
 }
 
 /* ── NAV ── */
+.user-info{
+    color:#00e5ff;
+    font-weight:600;
+    padding:10px 15px;
+    border:1px solid rgba(0,229,255,.2);
+    border-radius:12px;
+    background:rgba(0,229,255,.08);
+    backdrop-filter:blur(10px);
+    font-size:14px;
+}
+
+@media(max-width:768px){
+
+    .user-info{
+        display:none;
+    }
+
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -144,6 +169,7 @@ html, body {
 .search-btn:hover { opacity: .85; }
 .search-btn:active { transform: scale(.97); }
 
+
 .quick-picks {
   display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
   margin-top: 1rem;
@@ -158,6 +184,15 @@ html, body {
 .qp-btn:hover {
   background: rgba(0,229,255,.1); border-color: rgba(0,229,255,.3);
   color: var(--accent);
+}
+
+.last-search{
+    margin-top:15px;
+    color:#00e5ff;
+    font-size:14px;
+    font-weight:500;
+    opacity:0.9;
+    font-family: var(--font-mono);
 }
 
 /* Hero Stats */
@@ -433,4 +468,220 @@ html, body {
   background: rgba(255,23,68,.9); color: #fff; padding: .8rem 1.5rem;
   border-radius: var(--radius); font-family: var(--font-mono); font-size: .85rem;
   z-index: 500; max-width: 500px; text-align: center;
+}
+
+.history-box{
+    margin-top:20px;
+    padding:15px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(0,229,255,.15);
+    border-radius:12px;
+}
+
+.history-box h3{
+    color:#00e5ff;
+    margin-bottom:10px;
+    font-size:16px;
+}
+
+#searchHistory{
+    list-style:none;
+}
+
+#searchHistory li{
+    padding:6px 0;
+    color:#dfe6f3;
+    font-family:var(--font-mono);
+}
+
+
+.watchlist-box{
+    margin-top:20px;
+    padding:15px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,215,0,.15);
+    border-radius:12px;
+}
+
+.watchlist-box h3{
+    color:gold;
+    margin-bottom:10px;
+}
+
+#watchlist{
+    list-style:none;
+}
+
+#watchlist li{
+    padding:6px 0;
+    font-family:var(--font-mono);
+}
+.watchlist-mini-btn{
+
+    padding:6px 12px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:rgba(255,215,0,.15);
+
+    color:#ffd700;
+
+    cursor:pointer;
+
+    margin-bottom:10px;
+
+    transition:.3s;
+}
+
+.watchlist-mini-btn:hover{
+
+    background:rgba(255,215,0,.25);
+
+    transform:translateY(-2px);
+
+}
+
+.watchlist-mini-btn.added{
+
+    background:#00c853;
+
+    color:white;
+
+    border:1px solid #00c853;
+
+}
+
+.watchlist-mini-btn.added:hover{
+
+    background:#00e676;
+
+}
+/* Watchlist Drawer */
+
+.watchlist-drawer{
+
+    position: fixed;
+
+    top: 0;
+
+    right: -350px;
+
+    width: 350px;
+
+    height: 100vh;
+
+    background: #08111f;
+
+    border-left: 1px solid rgba(255,255,255,.1);
+
+    z-index: 9999;
+
+    transition: .35s ease;
+
+    padding: 20px;
+
+    overflow-y: auto;
+
+}
+
+.watchlist-drawer.active{
+
+    right: 0;
+
+}
+
+.drawer-header{
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+
+}
+
+.drawer-header h2{
+
+    color: #ffd700;
+
+    font-size: 20px;
+
+}
+
+#closeWatchlist{
+
+    background: none;
+
+    border: none;
+
+    color: white;
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+}
+
+#watchlist{
+
+    list-style: none;
+
+    padding: 0;
+
+}
+
+#watchlist li{
+
+    padding: 12px;
+
+    margin-bottom: 10px;
+
+    border-radius: 10px;
+
+    background: rgba(255,255,255,.05);
+
+    color: white;
+
+}
+
+#watchlist li{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:12px;
+
+    margin-bottom:10px;
+
+    border-radius:10px;
+
+    background:rgba(255,255,255,.05);
+
+    color:white;
+
+}
+
+.remove-watch{
+
+    background:none;
+
+    border:none;
+
+    color:#ff5c5c;
+
+    font-size:18px;
+
+    cursor:pointer;
+
 }

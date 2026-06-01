@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register | StockSenseAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+
+<body>
+
+<div class="auth-container">
+
+    <div class="logo">StockSenseAI</div>
+
+    <div class="tagline">
+        Create Your Trading Account
+    </div>
+
+    <form method="POST">
+
+        <div class="input-group">
+            <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                required>
+        </div>
+
+        <div class="input-group">
+            <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                required>
+        </div>
+
+        <button class="btn" type="submit">
+            Register
+        </button>
+
+    </form>
+
+    <div class="link">
+        <a href="/login">
+            Already have an account? Login
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

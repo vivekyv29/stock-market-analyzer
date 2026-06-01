@@ -4,12 +4,17 @@ let currentData   = null;
 let priceChart    = null;
 
 /* ── Nav routing ── */
-document.querySelectorAll(".nav-link").forEach(link => {
+document.querySelectorAll(".nav-link[data-view]").forEach(link => {
   link.addEventListener("click", e => {
     e.preventDefault();
+
     const view = link.dataset.view;
     switchView(view);
-    document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+
+    document.querySelectorAll(".nav-link").forEach(l => {
+      l.classList.remove("active");
+    });
+
     link.classList.add("active");
   });
 });
@@ -63,6 +68,88 @@ async function runAnalysis(ticker, period = "1y") {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     currentData = data;
+
+    const watchBtn =
+    document.getElementById("watchlistBtn");
+
+if (watchBtn) {
+
+    watchBtn.onclick = () => {
+
+        let watchlist =
+        JSON.parse(
+            localStorage.getItem("watchlist")
+        ) || [];
+
+        const exists =
+        watchlist.some(
+            stock => stock.ticker === data.ticker
+        );
+
+        if(exists){
+
+            showToast(
+                `📌 ${data.ticker} already in Wishlist`
+            );
+
+            return;
+        }
+
+        const stockData = {
+            ticker: data.ticker,
+            company: data.name
+        };
+
+        watchlist.unshift(stockData);
+
+        localStorage.setItem(
+            "watchlist",
+            JSON.stringify(watchlist)
+        );
+
+        renderWatchlist();
+
+        watchBtn.innerHTML = "✅ Added";
+        watchBtn.classList.add("added");
+
+        showToast(
+            `✅ ${data.name} added to Wishlist`
+        );
+
+    };
+
+}
+
+    localStorage.setItem("lastSearch", ticker);
+    let history =
+    JSON.parse(
+        localStorage.getItem("searchHistory")
+    ) || [];
+
+history.unshift(ticker);
+
+history = [...new Set(history)];
+
+history = history.slice(0,5);
+
+localStorage.setItem(
+    "searchHistory",
+    JSON.stringify(history)
+);
+
+renderSearchHistory();
+
+document.getElementById("lastSearch").textContent =
+    "Last Search: " + ticker;
+
+document
+  .querySelector('[data-view="analysis"]')
+  .classList.remove("disabled-nav");
+
+document
+  .querySelector('[data-view="prediction"]')
+  .classList.remove("disabled-nav");
+
     hideLoading();
     renderAnalysis(data);
     renderPrediction(data);
@@ -102,6 +189,34 @@ function showError(msg) {
 
 /* ── Render Analysis ── */
 function renderAnalysis(d) {
+
+const watchlist =
+JSON.parse(
+    localStorage.getItem("watchlist")
+) || [];
+
+const watchBtn =
+document.getElementById("watchlistBtn");
+
+const exists =
+watchlist.some(
+    stock => stock.ticker === d.ticker
+);
+
+if(exists){
+
+    watchBtn.innerHTML = "✅ Added";
+
+    watchBtn.classList.add("added");
+
+}else{
+
+    watchBtn.innerHTML = "📌 Add to Wishlist";
+
+    watchBtn.classList.remove("added");
+
+}
+
   // Header
   document.getElementById("shTicker").textContent = d.ticker;
   document.getElementById("shName").textContent   = d.name;
@@ -253,25 +368,25 @@ const closes = history.map(r => r.close);
                 },
 
                 {
-                  label: "AI Forecast",
-                  data: [
-                    ...Array(closes.length - 1).fill(null),
-                    closes[closes.length - 1],
-                    ...forecastPrices
-                ],
+                    label: "AI Forecast",
+                    data: [
+                        ...Array(closes.length - 1).fill(null),
+                        closes[closes.length - 1],
+                        ...forecastPrices
+                    ],
                     borderColor: "#ff6b35",
                     backgroundColor: "rgba(255,107,53,0.2)",
-                    borderWidth: 15,
-                    borderDash: [12, 6],
-                    pointRadius: 12,
-                    pointHoverRadius: 15,
-                    pointBackgroundColor: "#ff0000",
+                    borderWidth: 3,
+                    borderDash: [6, 4],
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: "#ff6b35",
                     pointBorderColor: "#ffffff",
-                    pointBorderWidth: 2,
+                    pointBorderWidth: 1,
                     spanGaps: true,
                     showLine: true,
                     fill: false,
-                    tension: 0
+                    tension: 0.3
                 }
 
             ]
@@ -408,3 +523,147 @@ function scoreSentiment(text) {
   const neg = NEG_WORDS.filter(w => t.includes(w)).length;
   return pos - neg;
 }
+
+function renderSearchHistory() {
+
+    const history =
+        JSON.parse(
+            localStorage.getItem("searchHistory")
+        ) || [];
+
+    const list =
+        document.getElementById("searchHistory");
+
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    history.forEach(stock => {
+
+        const li =
+            document.createElement("li");
+
+        li.textContent = stock;
+
+console.log("Appending:", stock);
+console.log(li);
+
+        list.appendChild(li);
+
+    });
+
+}
+
+
+function renderWatchlist(){
+  console.log("renderWatchlist called");
+  renderSearchHistory();
+  const watchlist =
+  JSON.parse(
+    localStorage.getItem("watchlist")
+  ) || [];
+  console.log(watchlist);
+  
+  const list =
+        document.getElementById("watchlist");
+        console.log("List element:", list);
+        
+        list.innerHTML = "";
+        
+        watchlist.forEach(item => {
+
+          const li =
+          document.createElement("li");
+          
+          li.innerHTML = `
+          <span>
+          <strong>${item.ticker}</strong>
+          <br>
+          <small>${item.company}</small>
+          </span>
+          
+          <button
+          class="remove-watch"
+          data-stock="${item.ticker}">
+          ✕
+          </button>
+          `;
+          
+          list.appendChild(li);
+          console.log("Added:", item.ticker);
+          
+li.querySelector(".remove-watch")
+.addEventListener("click", () => {
+
+    let watchlist =
+        JSON.parse(
+            localStorage.getItem("watchlist")
+        ) || [];
+
+    watchlist = watchlist.filter(
+        s => s.ticker !== item.ticker
+    );
+
+localStorage.setItem(
+    "watchlist",
+    JSON.stringify(watchlist)
+);
+
+// Remove card instantly
+li.remove();
+
+showToast(
+    `❌ ${item.company} removed from Wishlist`
+);
+
+if(
+    currentData &&
+    currentData.ticker === item.ticker
+){
+
+    const watchBtn =
+        document.getElementById("watchlistBtn");
+
+    watchBtn.innerHTML =
+        "📌 Add to Wishlist";
+
+    watchBtn.classList.remove("added");
+}
+    renderWatchlist();
+
+});
+        
+    });
+
+}
+
+// Open Watchlist
+
+document
+.getElementById("openWatchlist")
+.addEventListener("click", () => {
+
+    document
+    .getElementById("watchlistDrawer")
+    .classList.add("active");
+
+});
+
+// Close Watchlist
+
+
+document
+.getElementById("closeWatchlist")
+.addEventListener("click", () => {
+
+    document
+    .getElementById("watchlistDrawer")
+    .classList.remove("active");
+
+});
+
+window.addEventListener("load", () => {
+
+    renderWatchlist();
+
+});
